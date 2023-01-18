@@ -29,17 +29,21 @@ async function getUser(req, res, id) {
 // GET /api/users/:id
 async function createUser(req, res) {
   try {
-    let body = ""
+    let body = '';
 
-    req.on('data', chunk => {
-      body = `${chunk}`
-      console.log(body)
+    req.on('data', (chunk) => {
+      body += chunk.toString()
     })
 
-    const newUser = await create(body)
+    req.on('end', async () => {
+      const parsedBody = JSON.parse(body)
 
-    res.writeHead(201, {'Content-Type': 'application/json'})
-    return res.end(newUser)
+      const newUser = await create(parsedBody)
+
+      res.writeHead(201, {'Content-Type': 'application/json'})
+      return res.end(JSON.stringify(newUser))
+    })
+
   } catch (error) {
     console.log()
   }
